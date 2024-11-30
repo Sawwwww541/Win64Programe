@@ -1,0 +1,16 @@
+# ninja log v6
+5	319	7530790088072722	build.ninja	c815067c946508e3
+11	802	7530761169650988	CMakeFiles/Finalworks.dir/D_/My_C/cmake-build-debug/gernaltest/midsearch.cpp.obj	6949b67b1d03ec26
+11	1905	7526679002089150	CMakeFiles/Finalworks.dir/main.cpp.obj	4c75253ef0cfddf3
+1905	2065	7526679021038701	Finalworks.exe	141c13d5b7148c2c
+28	698	7526673542816255	CMakeFiles/Finalworks.dir/D_/My_C/归并排序.cpp.obj	fe5e1f05557692dd
+12	431	7526678084890776	CMakeFiles/Finalworks.dir/归并排序.cpp.obj	ef93b75a0ee2c611
+14	468	7530789221784427	CMakeFiles/Finalworks.dir/D_/My_C/midsearch.cpp.obj	c25c24e19b22d7ee
+7	1971	7530790584925126	CMakeFiles/Finalworks.dir/main.cpp.obj	4c75253ef0cfddf3
+1972	2135	7530790604575738	Finalworks.exe	f030f53031c0fe9a
+9	460	7530792285176523	CMakeFiles/Finalworks.dir/D_/My_C/midsearch.cpp.obj	c25c24e19b22d7ee
+460	637	7530792289688684	Finalworks.exe	f030f53031c0fe9a
+13	529	7530795487051862	CMakeFiles/Finalworks.dir/D_/My_C/midsearch.cpp.obj	c25c24e19b22d7ee
+529	669	7530795492203086	Finalworks.exe	f030f53031c0fe9a
+6	476	7530819363490206	CMakeFiles/Finalworks.dir/D_/My_C/midsearch.cpp.obj	c25c24e19b22d7ee
+476	826	7530819368188438	Finalworks.exe	f030f53031c0fe9a
