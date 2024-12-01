@@ -1,13 +1,12 @@
-cmake_minimum_required(VERSION 3.29)
+cmake_minimum_required(VERSION 3.10)
+
 project(Finalworks)
 
-set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-include_directories(.)
+include_directories(Finalworks/src)
 
-link_libraries(libeasyx.a)
+file(GLOB SOURCES "src/*.cpp")
 
-add_executable(Finalworks
-        main.cpp
-        ../midsearch.cpp
-)
+add_executable(Finalworks ${SOURCES})

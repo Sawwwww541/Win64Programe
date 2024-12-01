@@ -1,33 +1,21 @@
 /*注意：乱码是因为vscode默认的文件编码格式是UTF-8，而Windows的终端默认编码格式是gbk，两种格式冲突导致乱码；
 解决办法就是修改vscode默认设置，与Windows终端同步即可*/
 #include <iostream>
-#include <memory>
+#include <fstream>
 #include <string>
-
-//日期类
-class Date
-{
-    public:
-        Date():year(0),month(0),day(0){}
-        int year;
-        int month;
-        int day;
-};
+#include <sstream>
 
 //成员类
-class Homemember : public Date
+class Homemember
 {
     public:
         Homemember():ID("none"),amount(0.0),type("none"),method("none"),
         site("none"),detail("none"),next(nullptr){}
 
-        void entermsgs(Homemember *temp)
+        void entermsgs(Homemember *temp)                        //录入数据
         {
-            //启动一下菜单
-
-            //录入数据
-            std::cout<<"请输入消费日期（例：xxxx x x）："<<std::endl;
-            std::cin>>temp->year>>temp->month>>temp->day;
+            std::cout<<"请输入消费日期（例：20240409）："<<std::endl;
+            std::cin>>temp->Date;
 
             std::cout<<"请输入成员信息："<<std::endl;
             std::cin>>temp->ID;
@@ -49,6 +37,7 @@ class Homemember : public Date
 
         }
     
+        std::string Date;
         std::string ID;
         double amount;
         std::string type;
@@ -61,20 +50,35 @@ class Homemember : public Date
 void usrmenu();
 void findmenu();
 void summenu();
+
+
 void findtotal(Homemember *head);
 void find1(Homemember *head);
 void find2(Homemember *head);
 void find3(Homemember *head);
 void find4(Homemember *head);
+
+
+void add(Homemember *head);
 Homemember* rank(Homemember *head);
 Homemember* midsearch(Homemember *head);
 Homemember* merge(Homemember *head1,Homemember *head2);
+void change(Homemember *head,int& judgement);
+
+
 void sumtotal(Homemember *head);
 double sum1(Homemember *head);
 double sum2(Homemember *head);
 double sum3(Homemember *head);
+
+
 void printmsgs(Homemember *target);
-void save(Homemember *head);
+void printall(Homemember *head,char& isprint);
+
+
+void ifile(Homemember *head);
+void ofile(Homemember *head);
+void Deletelist(Homemember *head);
 
 //初始用户界面--一级菜单
 void usrmenu()
@@ -106,21 +110,37 @@ void summenu()
     std::cout<<"**************************************************************************"<<std::endl;
 }
 
-//录入函数群(录入并保存到文件)
-void add(Homemember *head)
+
+//信息打印函数
+void printmsgs(Homemember *target)
 {
-    //移动指针，利用尾插法增添链表节点
-    auto *temp=new Homemember;
-    auto *move=head;
+    std::cout<<"-------------------------------------"<<std::endl;
+    std::cout<<"消费日期："<<target->Date<<std::endl;
+    std::cout<<"成员身份："<<target->ID<<std::endl;
+    std::cout<<"消费金额："<<target->amount<<std::endl;
+    std::cout<<"消费品类："<<target->type<<std::endl;
+    std::cout<<"支出方式："<<target->method<<std::endl;
+    std::cout<<"消费场所："<<target->site<<std::endl;
+    std::cout<<"商品详情："<<target->detail<<std::endl;
+    std::cout<<"-------------------------------------"<<std::endl;
+}
 
-    while(move->next!=nullptr) 
+
+//用于排序后的打印函数，封装起来好看一点
+void printall(Homemember *head,char& isprint)
+{
+    std::cout<<"已按消费日期升序，是否打印信息？[y/n]"<<std::endl;
+    std::cin>>isprint;
+    if(isprint=='y')
     {
-        move=move->next;
+        Homemember *move=head->next;
+        while(move!=nullptr)
+        {
+            printmsgs(move);
+            move=move->next;
+        }
     }
-
-    temp->entermsgs(temp);
-    move->next=temp;
-                
+    return;
 }
 
 //查询函数群(1.起止日期2.金额3.某人+起止日期4.某物+起止日期)
@@ -159,18 +179,20 @@ void findtotal(Homemember *head)
     }
 
 }
+
 //日期
 void find1(Homemember *head)
 {
     auto *move=head->next;
-    int year=0,month=0,day=0,temp=0;
+    int temp=0;
+    std::string Date;
 
-    std::cout<<"请输入消费日期（例：xxxx x x）："<<std::endl;
-    std::cin>>year>>month>>day;
+    std::cout<<"请输入消费日期（例：20240409）："<<std::endl;
+    std::cin>>Date;
 
     while(move!=nullptr)
     {
-        if(year==move->year&&month==move->month&&day==move->day)
+        if(Date==move->Date)
         {
             //打印消费记录
             printmsgs(move);
@@ -187,11 +209,12 @@ void find1(Homemember *head)
         system("cls");
     }
 }
+
 //金额
 void find2(Homemember *head)
 {
     auto *move=head->next;
-    double amount=0.0;
+    double amount;
     int temp=0;
 
     std::cout<<"请输入消费金额："<<std::endl;
@@ -216,21 +239,23 @@ void find2(Homemember *head)
     }
 
 }
+
 //人+日期
 void find3(Homemember *head)
 {
     auto *move=head->next;
     std::string ID;
-    int year=0,month=0,day=0,temp=0;
+    int temp=0;
+    std::string Date;
 
-    std::cout<<"请输入消费日期（例：xxxx x x）："<<std::endl;
-    std::cin>>year>>month>>day;
+    std::cout<<"请输入消费日期（例：20240409）："<<std::endl;
+    std::cin>>Date;
     std::cout<<"请输入成员信息："<<std::endl;
     std::cin>>ID;
 
     while(move!=nullptr)
     {
-        if(year==move->year&&month==move->month&&day==move->day&&ID==move->ID)
+        if(Date==move->Date)
         {
             //打印消费记录
             printmsgs(move);
@@ -246,21 +271,23 @@ void find3(Homemember *head)
         system("cls");
     }
 }
+
 //物+日期
 void find4(Homemember *head)
 {
     auto *move=head->next;
     std::string type;
-    int year=0,month=0,day=0,temp=0;
+    int temp=0;
+    std::string Date;
 
-    std::cout<<"请输入消费日期（例：xxxx x x）："<<std::endl;
-    std::cin>>year>>month>>day;
+    std::cout<<"请输入消费日期（例：20240409）："<<std::endl;
+    std::cin>>Date;
     std::cout<<"请输入消费品类："<<std::endl;
     std::cin>>type;
 
     while(move!=nullptr)
     {
-        if(year==move->year&&month==move->month&&day==move->day&&type==move->type)
+        if(Date==move->Date)
         {
             //打印消费记录
             printmsgs(move);
@@ -275,82 +302,6 @@ void find4(Homemember *head)
         system("pause");
         system("cls");
     }
-
-}
-//排序函数群(按交易日期升序)
-//采用归并排序
-Homemember* rank(Homemember *head) 
-{
-    if(head==nullptr||head->next==nullptr) return head;
-
-    Homemember *head1=head;
-    Homemember *head2=midsearch(head);
-
-    head1=rank(head1);
-    head2=rank(head2);
-
-    return merge(head1,head2);
-
-}
-//查找链表中点
-Homemember* midsearch(Homemember *head)
-{
-    Homemember *slow=head,*fast=head->next;
-
-    while(fast!=nullptr&&fast->next!=nullptr)
-    {
-        slow=slow->next;
-        fast=fast->next->next;
-    }
-
-    Homemember *mid=slow->next;
-    slow->next=nullptr;         //切断中点与另一半的链接
-
-    return mid;
-}
-
-Homemember* merge(Homemember *head1,Homemember *head2)
-{
-    Homemember *temp=new Homemember(),*p=temp;
-
-    while(head1!=nullptr&&head2!=nullptr)
-    {
-        if(head1->year<=head2->year)
-        {
-            if(head1->month<=head2->month)
-            {
-                if(head1->day<=head2->day)
-                {
-                    p->next=head1;
-                    head1=head1->next;
-                }
-                else
-                {
-                    p->next=head2;
-                    head2=head2->next;
-                }
-            }
-            else
-            {
-                p->next=head2;
-                head2=head2->next;
-            }
-        }
-        else
-        {
-            p->next=head2;
-            head2=head2->next;
-        }
-        p=p->next;
-    }
-
-    if(head1!=nullptr) p->next=head1;
-    else p->next=head2;
-
-    Homemember *ret=temp->next;
-    delete temp;
-    temp=nullptr;
-    return ret;
 
 }
 
@@ -391,21 +342,20 @@ void sumtotal(Homemember *head)
 double sum1(Homemember *head)
 {
     auto *move=head->next;
-    Date begin,end;
+    std::string begin,end;
     std::string ID;
     double sumamount=0.0;
 
     std::cout<<"请输入家庭成员："<<std::endl;
     std::cin>>ID;
-    std::cout<<"请输入起始时间："<<std::endl;
-    std::cin>>begin.year>>begin.month>>begin.day;
-    std::cout<<"请输入终止时间："<<std::endl;
-    std::cin>>end.year>>end.month>>end.day;
+    std::cout<<"请输入起始时间：(例如：20240409)"<<std::endl;
+    std::cin>>begin;
+    std::cout<<"请输入终止时间：(例如：20240409)"<<std::endl;
+    std::cin>>end;
 
     while(move!=nullptr)
     {
-        if(move->ID==ID&&move->year>=begin.year&&move->month>=begin.month&&move->day>=begin.day&&
-            move->year<=end.year&&move->month<=end.month&&move->day<=end.day)
+        if(move->ID==ID&&move->Date>=begin&&move->Date<=end)
             {
                 printmsgs(move);
                 sumamount+=move->amount;
@@ -423,21 +373,20 @@ double sum1(Homemember *head)
 double sum2(Homemember *head)
 {
     auto *move=head->next;
-    Date begin,end;
+    std::string begin,end;
     std::string type;
     double sumamount=0.0;
 
     std::cout<<"请输入消费品类："<<std::endl;
     std::cin>>type;
     std::cout<<"请输入起始时间："<<std::endl;
-    std::cin>>begin.year>>begin.month>>begin.day;
+    std::cin>>begin;
     std::cout<<"请输入终止时间："<<std::endl;
-    std::cin>>end.year>>end.month>>end.day;
+    std::cin>>end;
 
     while(move!=nullptr)
     {
-        if(move->type==type&&move->year>=begin.year&&move->month>=begin.month&&move->day>=begin.day&&
-            move->year<=end.year&&move->month<=end.month&&move->day<=end.day)
+        if(move->type==type&&move->Date>=begin&&move->Date<=end)
             {
                 printmsgs(move);
                 sumamount+=move->amount;
@@ -455,18 +404,17 @@ double sum2(Homemember *head)
 double sum3(Homemember *head)
 {
     auto *move=head->next;
-    Date begin,end;
+    std::string begin,end;
     double sumamount=0.0;
 
     std::cout<<"请输入起始时间："<<std::endl;
-    std::cin>>begin.year>>begin.month>>begin.day;
+    std::cin>>begin;
     std::cout<<"请输入终止时间："<<std::endl;
-    std::cin>>end.year>>end.month>>end.day;
+    std::cin>>end;
 
     while(move!=nullptr)
     {
-        if(move->year>=begin.year&&move->month>=begin.month&&move->day>=begin.day&&
-            move->year<=end.year&&move->month<=end.month&&move->day<=end.day)
+        if(move->Date>=begin&&move->Date<=end)
             {
                 printmsgs(move);
                 sumamount+=move->amount;
@@ -480,22 +428,99 @@ double sum3(Homemember *head)
     return sumamount;
 }
 
+//录入函数群(录入并保存到文件)
+void add(Homemember *head)
+{
+    //移动指针，利用尾插法增添链表节点
+    auto *temp=new Homemember;
+    auto *move=head;
+
+    while(move->next!=nullptr) 
+    {
+        move=move->next;
+    }
+
+    temp->entermsgs(temp);
+    move->next=temp;
+                
+}
+
+//排序函数群(按交易日期升序)
+//采用归并排序
+Homemember* rank(Homemember *head) 
+{
+    if(head==nullptr||head->next==nullptr) return head;
+
+    Homemember *head1=head;
+    Homemember *head2=midsearch(head);
+
+    head1=rank(head1);
+    head2=rank(head2);
+
+    return merge(head1,head2);
+
+}
+//查找链表中点
+Homemember* midsearch(Homemember *head)
+{
+    Homemember *slow=head,*fast=head->next;
+
+    while(fast!=nullptr&&fast->next!=nullptr)
+    {
+        slow=slow->next;
+        fast=fast->next->next;
+    }
+
+    Homemember *mid=slow->next;
+    slow->next=nullptr;         //切断中点与另一半的链接
+
+    return mid;
+}
+//合并，顺便完成排序
+Homemember* merge(Homemember *head1,Homemember *head2)
+{
+    Homemember *temp=new Homemember(),*p=temp;
+
+    while(head1!=nullptr&&head2!=nullptr)
+    {
+        if(head1->Date<=head2->Date)
+        {
+            p->next=head1;
+            head1=head1->next;
+        }
+        else
+        {
+            p->next=head2;
+            head2=head2->next;
+        }
+
+        p=p->next;
+    }
+
+    if(head1!=nullptr) p->next=head1;
+    else p->next=head2;
+
+    Homemember *ret=temp->next;
+    delete temp;
+    temp=nullptr;
+    return ret;
+
+}
 
 //更新函数群(修改并保存到文件,或者删除某一结点)
-//可以内联一些函数
 void change(Homemember *head,int& judgement) 
 {
     std::string ID,type;
     double amount;
-    int year=0,month=0,day=0;
+    std::string Date;
     auto *target=head->next,*slow=head;
     char yesorno='n';
 
     //更详细的搜索模块，防止修改到一个以上的条目
 
     std::cout<<"请输入相关信息，以便定位您要修改的条目"<<std::endl;
-    std::cout<<"请输入消费日期（例：xxxx x x）："<<std::endl;
-    std::cin>>year>>month>>day;    
+    std::cout<<"请输入消费日期（例：20240409）："<<std::endl;
+    std::cin>>Date;    
     std::cout<<"成员身份："<<std::endl;
     std::cin>>ID;
     std::cout<<"消费金额："<<std::endl;
@@ -505,7 +530,7 @@ void change(Homemember *head,int& judgement)
 
     while(target!=nullptr)
     {
-        if(year==target->year&&month==target->month&&day==target->day&&ID==target->ID
+        if(Date==target->Date&&ID==target->ID
         &&amount==target->amount&&type==target->type)
         {
             //打印消费记录
@@ -550,54 +575,68 @@ void change(Homemember *head,int& judgement)
 
 }
 
-//信息打印函数
-void printmsgs(Homemember *target)
+//文件IO
+void ifile(Homemember *head)                //内存到文件
 {
-    std::cout<<"-------------------------------------"<<std::endl;
-    std::cout<<"消费日期："<<target->year<<" "<<target->month<<" "<<target->day<<std::endl;
-    std::cout<<"成员身份："<<target->ID<<std::endl;
-    std::cout<<"消费金额："<<target->amount<<std::endl;
-    std::cout<<"消费品类："<<target->type<<std::endl;
-    std::cout<<"支出方式："<<target->method<<std::endl;
-    std::cout<<"消费场所："<<target->site<<std::endl;
-    std::cout<<"商品详情："<<target->detail<<std::endl;
-    std::cout<<"-------------------------------------"<<std::endl;
-}
-//用于排序后的打印函数，封装起来好看一点
-void printall(Homemember *head,char& isprint)
-{
-    std::cout<<"已按消费日期升序，是否打印信息？[y/n]"<<std::endl;
-    std::cin>>isprint;
-    if(isprint=='y')
+    std::ofstream file("fee.dat",std::ios::out);
+    auto *move=head->next;
+
+    if(file.is_open())
     {
-        Homemember *move=head->next;
         while(move!=nullptr)
         {
-            printmsgs(move);
+            file<<move->Date<<" "<<move->ID<<" "<<move->amount<<" "<<move->type<<" "
+            <<move->method<<" "<<move->site<<" "<<move->detail<<"\n"
+            <<"###"<<std::endl;              //＃号作为大分隔符，将模块区分开
             move=move->next;
         }
     }
-    return;
+
+    file.close();
 }
 
-//文件IO
-void save(Homemember *head)
+void ofile(Homemember *head)                //文件到内存
 {
-    FILE *file=fopen("./fee.dat","w+");
-    if(file==nullptr) 
+    auto *tail=head;
+    std::ifstream file("fee.dat");
+    std::string _check;
+    
+    if(file.is_open())
     {
-        std::cout<<"文件打开失败"<<std::endl;
-        return;
-    }
-    Homemember *move=head->next;
-    while(move!=nullptr) 
-    {
-        if(fwrite(&move,sizeof(Homemember),1,file)!=1) 
+        while(std::getline(file,_check))
         {
-            std::cout<<"写入失败"<<std::endl;
-            return;
+            
+            if(_check=="###")
+            {
+                 while(tail->next!=nullptr)              //将指针移到链表尾
+                {
+                    tail=tail->next;
+                }
+                
+            }
+            else
+            {
+                Homemember *newnode=new Homemember;
+                std::istringstream iss(_check);
+                if(iss>>newnode->Date>>newnode->ID>>newnode->amount>>newnode->type>>newnode->method>>newnode->site>>newnode->detail)
+                {
+                    tail->next=newnode;
+                    tail=newnode;
+                }
+            }
         }
-        move=move->next;
     }
-    fclose(file);
+
+}
+
+//内存管理
+void Deletelist(Homemember *head)
+{
+    auto *move=head;
+    while(move!=nullptr)
+    {
+        auto *temp=move;
+        move=move->next;
+        delete temp;
+    }
 }
